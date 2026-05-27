@@ -8,30 +8,7 @@ Guia completo de estudos para **CBM PE** e **CBM AL** com:
 - Funciona offline
 - Instalável no Android como app nativo
 
----
 
-## 🚀 Como instalar no Android (2 métodos)
-
-### Método 1 — GitHub Pages (gratuito, 3 minutos)
-
-1. Crie uma conta gratuita em [github.com](https://github.com)
-2. Crie um repositório chamado `cbm-estudos` (público)
-3. Faça upload de todos estes arquivos
-4. Vá em **Settings → Pages → Source: main / root**
-5. Acesse `https://SEU_USUARIO.github.io/cbm-estudos` no Chrome do Android
-6. Chrome mostrará automaticamente **"Adicionar à tela inicial"** → toque e instale!
-
-### Método 2 — APK via PWABuilder (sem código, gratuito)
-
-1. Hospede os arquivos (método acima)
-2. Acesse [pwabuilder.com](https://pwabuilder.com)
-3. Cole a URL do seu GitHub Pages
-4. Clique em **"Build My PWA"** → **Android** → **Download**
-5. Instale o APK no seu Android (habilite "fontes desconhecidas" nas configurações)
-
----
-
-## 📲 Recursos do App
 
 | Recurso | Descrição |
 |---------|-----------|
