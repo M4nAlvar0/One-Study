@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#c85d17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CBM Estudos">
+<meta name="description" content="Guia de estudos CBM PE e AL">
+<title>CBM Estudos</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="favicon.png">
+<style>
+:root{
+  --bg:#0a0a0f; --bg2:#161b22; --bg3:#21262d;
+  --border:#30363d; --border2:#21262d;
+  --text:#e8e8e8; --text2:#8b949e; --text3:#484f58;
+  --accent:#c85d17; --accent2:#ff8c42;
+  --green:#3B6D11; --green2:#4a8a15;
+  --blue:#185FA5; --purple:#7F77DD;
+  --warn:#BA7517; --red:#993C1D;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --nav-h: 64px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+#app{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top)}
+#header{background:var(--bg2);border-bottom:1px solid var(--border2);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#header h1{font-size:17px;font-weight:700;color:var(--accent)}
+#header .sub{font-size:11px;color:var(--text2)}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--nav-h) + var(--safe-bot) + 8px)}
+#nav{position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-bot));background:var(--bg2);border-top:1px solid var(--border2);display:flex;padding-bottom:var(--safe-bot);z-index:100}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;color:var(--text3);transition:.15s;padding:6px 0;font-family:inherit}
+.nav-btn.active{color:var(--accent)}
+.nav-btn .ic{font-size:22px;line-height:1}
+.nav-btn .lb{font-size:10px;font-weight:500}
+.page{display:none;padding:0}
+.page.active{display:block}
+/* Cards */
+.card{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin:12px 12px 0}
+.card-title{font-size:10px;letter-spacing:3px;color:var(--accent);margin-bottom:8px;font-weight:600}
+/* Stat grid */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px;margin:0}
+.stat-card{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:12px 8px;text-align:center}
+.stat-val{font-size:22px;font-weight:700;color:var(--accent)}
+.stat-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+/* Progress bar */
+.prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .4s}
+/* Discipline pills */
+.disc-scroll{display:flex;gap:6px;overflow-x:auto;padding:0 12px 4px;scrollbar-width:none;margin-top:12px}
+.disc-scroll::-webkit-scrollbar{display:none}
+.disc-pill{flex-shrink:0;font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap}
+.disc-pill.sel{color:#fff;border-color:transparent}
+/* Topic cards */
+.topic-card{margin:8px 12px 0;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:12px;transition:border-color .2s}
+.topic-card.done{border-color:var(--green)}
+.topic-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.topic-meta{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.dif-dots{display:flex;gap:3px}
+.dif-dot{width:8px;height:8px;border-radius:50%}
+.hours-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.hours-label{font-size:11px;color:var(--text2);flex:1}
+.hours-ctrl{display:flex;align-items:center;gap:6px}
+.h-btn{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:none;color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;line-height:1;flex-shrink:0}
+.h-inp{width:48px;text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px;font-weight:600;padding:3px 4px;font-family:inherit}
+.dual-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;display:flex;margin-bottom:4px}
+.bar-done{background:var(--green);height:100%;border-radius:4px;transition:width .4s;flex-shrink:0}
+.bar-rest{background:var(--warn);height:100%;transition:width .4s;opacity:.5;flex-shrink:0}
+.bar-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text2)}
+.bar-labels .done{color:var(--green)}
+.bar-labels .rest{color:var(--warn)}
+.done-banner{margin-top:8px;background:rgba(59,109,17,.12);border:1px solid rgba(59,109,17,.3);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--green)}
+.note-area{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px;color:var(--text);font-size:12px;font-family:inherit;resize:vertical;min-height:56px;margin-top:8px;outline:none}
+.note-area:focus{border-color:var(--accent)}
+.note-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;font-family:inherit;margin-top:4px}
+/* Timer */
+.timer-wrap{text-align:center;padding:20px 16px}
+.timer-ring{position:relative;display:inline-block;margin:20px 0}
+.timer-ring svg{transform:rotate(-90deg)}
+.timer-ring .bg-circle{fill:none;stroke:var(--bg3);stroke-width:10}
+.timer-ring .prog-circle{fill:none;stroke:var(--accent);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .5s}
+.timer-time{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;font-weight:700;color:var(--text)}
+.timer-phase{font-size:13px;color:var(--text2);margin-top:2px}
+.timer-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.t-btn{padding:12px 24px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.t-btn.primary{background:var(--accent);color:#fff}
+.t-btn.secondary{background:var(--bg2);color:var(--text);border:1px solid var(--border)}
+.timer-select{width:100%;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;margin-bottom:12px;cursor:pointer;outline:none}
+.pomodoro-count{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.pom-dot{width:12px;height:12px;border-radius:50%;background:var(--bg3);border:1px solid var(--border);transition:.2s}
+.pom-dot.done{background:var(--accent)}
+.session-log{max-height:180px;overflow-y:auto;margin:0 12px}
+.log-item{font-size:11px;color:var(--text2);padding:5px 0;border-bottom:1px solid var(--border2)}
+/* Home widgets */
+.widget-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px;margin:0}
+.widget{background:var(--bg2);border:1px solid var(--border2);border-radius:12px;padding:12px}
+.widget-big{grid-column:span 2}
+.widget-title{font-size:10px;letter-spacing:2px;color:var(--text2);margin-bottom:8px;font-weight:500}
+.streak-num{font-size:36px;font-weight:700;color:var(--accent)}
+.encour{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.4}
+/* Notes page */
+.notes-disc{margin:8px 12px 0}
+.notes-disc-title{font-size:12px;font-weight:700;color:var(--accent);padding:8px 0 4px}
+.note-item{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:10px;margin-bottom:6px}
+.note-topic{font-size:11px;font-weight:600;color:var(--text);margin-bottom:4px}
+.note-text{font-size:12px;color:var(--text2);line-height:1.4;white-space:pre-wrap}
+/* Splash / install */
+#install-bar{background:var(--accent);padding:10px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0}
+#install-bar span{font-size:12px;color:#fff;flex:1}
+#install-bar button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit}
+.hidden{display:none!important}
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .2s ease}
+/* Notification bell */
+#notif-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Install bar -->
+  <div id="install-bar" class="hidden" onclick="installApp()">
+    <span>📲 Instalar CBM Estudos no Android</span>
+    <button>Instalar</button>
+    <button onclick="event.stopPropagation();document.getElementById('install-bar').classList.add('hidden')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer">✕</button>
+  </div>
+  <!-- Header -->
+  <div id="header">
+    <div>
+      <div id="page-title" style="font-size:17px;font-weight:700;color:var(--accent)">🔥 CBM Estudos</div>
+      <div id="page-sub" class="sub">Progresso geral: <span id="hdr-pct">0%</span></div>
+    </div>
+    <button id="notif-btn" onclick="toggleNotif()" title="Lembretes">🔔</button>
+  </div>
+  <!-- Content -->
+  <div id="content">
+    <!-- HOME -->
+    <div id="page-home" class="page active fade-in">
+      <div class="widget-row">
+        <div class="widget widget-big">
+          <div class="widget-title">PROGRESSO GERAL</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+            <div style="font-size:32px;font-weight:700;color:var(--green)" id="home-pct">0%</div>
+            <div style="flex:1">
+              <div class="prog-bar" style="height:10px;margin-bottom:4px"><div class="prog-fill" id="home-bar" style="width:0%;background:var(--green)"></div></div>
+              <div class="encour" id="home-encour">🚀 Comece hoje!</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px">
+            <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:6px">
+              <div style="font-size:16px;font-weight:700;color:var(--green)" id="hm-done">0h</div>
+              <div style="font-size:10px;color:var(--text2)">Estudadas</div>
+            </div>
+            <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:6px">
+              <div style="font-size:16px;font-weight:700;color:var(--warn)" id="hm-rest">0h</div>
+              <div style="font-size:10px;color:var(--text2)">Restantes</div>
+            </div>
+            <div style="text-align:center;padding:6px;background:var(--bg3);border-radius:6px">
+              <div style="font-size:16px;font-weight:700;color:var(--accent)" id="hm-total">0h</div>
+              <div style="font-size:10px;color:var(--text2)">Total</div>
+            </div>
+          </div>
+        </div>
+        <div class="widget">
+          <div class="widget-title">SEQUÊNCIA</div>
+          <div class="streak-num" id="streak-num">0</div>
+          <div style="font-size:11px;color:var(--text2)">dias seguidos 🔥</div>
+        </div>
+        <div class="widget" onclick="goPage('timer')" style="cursor:pointer">
+          <div class="widget-title">TIMER</div>
+          <div style="font-size:22px;font-weight:700;color:var(--accent)" id="home-timer-disp">25:00</div>
+          <div style="font-size:11px;color:var(--text2)">Toque para estudar</div>
+        </div>
+      </div>
+      <!-- Disc progress mini -->
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">📚 DISCIPLINAS</div>
+        <div id="home-discs"></div>
+      </div>
+      <!-- Today log -->
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">📅 HOJE</div>
+        <div id="home-today" style="font-size:12px;color:var(--text2)">Nenhuma sessão registrada hoje.</div>
+      </div>
+      <!-- CBM concursos info -->
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">🏛 CONCURSOS</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px">
+          <div style="background:rgba(24,95,165,.1);border:1px solid rgba(24,95,165,.3);border-radius:8px;padding:10px">
+            <div style="font-size:12px;font-weight:700;color:#185FA5">CBM PE</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">60 questões · 9 disc.</div>
+            <div style="font-size:10px;color:var(--text2)">Banca: AOCP · 2023</div>
+          </div>
+          <div style="background:rgba(59,109,17,.1);border:1px solid rgba(59,109,17,.3);border-radius:8px;padding:10px">
+            <div style="font-size:12px;font-weight:700;color:var(--green)">CBM AL</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">8 disciplinas</div>
+            <div style="font-size:10px;color:var(--text2)">Banca: AOCP · 2026</div>
+          </div>
+        </div>
+      </div>
+      <div style="height:16px"></div>
+    </div>
+    <!-- PROGRESSO -->
+    <div id="page-progress" class="page fade-in">
+      <div class="disc-scroll" id="disc-pills"></div>
+      <div id="topics-container" style="margin-top:4px"></div>
+    </div>
+    <!-- TIMER -->
+    <div id="page-timer" class="page fade-in">
+      <div class="timer-wrap">
+        <select class="timer-select" id="timer-disc-sel">
+          <option value="">— Selecione a disciplina —</option>
+        </select>
+        <div class="timer-ring">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle class="bg-circle" cx="100" cy="100" r="90"/>
+            <circle class="prog-circle" id="timer-arc" cx="100" cy="100" r="90" stroke-dasharray="565.48" stroke-dashoffset="0"/>
+          </svg>
+          <div class="timer-time" id="timer-disp">25:00</div>
+        </div>
+        <div class="timer-phase" id="timer-phase">Foco</div>
+        <div class="pomodoro-count" id="pom-dots"></div>
+        <div class="timer-btns">
+          <button class="t-btn secondary" onclick="resetTimer()">⏹ Reset</button>
+          <button class="t-btn primary" id="timer-play-btn" onclick="toggleTimer()">▶ Iniciar</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:20px">
+          <div style="text-align:center;cursor:pointer" onclick="setMode(25,5,'pomodoro')">
+            <div style="font-size:18px;font-weight:700;color:var(--accent)">25</div>
+            <div style="font-size:10px;color:var(--text2)">Pomodoro</div>
+          </div>
+          <div style="text-align:center;cursor:pointer" onclick="setMode(50,10,'longo')">
+            <div style="font-size:18px;font-weight:700">50</div>
+            <div style="font-size:10px;color:var(--text2)">Foco longo</div>
+          </div>
+          <div style="text-align:center;cursor:pointer" onclick="setMode(15,5,'rapido')">
+            <div style="font-size:18px;font-weight:700">15</div>
+            <div style="font-size:10px;color:var(--text2)">Rápido</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px;margin-left:0;margin-right:0;text-align:left">
+          <div class="card-title">📋 SESSÕES DE HOJE</div>
+          <div class="session-log" id="session-log">
+            <div style="font-size:12px;color:var(--text2)">Nenhuma sessão ainda.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- NOTAS -->
+    <div id="page-notes" class="page fade-in">
+      <div class="card" style="display:flex;gap:8px;align-items:center">
+        <input id="note-search" type="search" placeholder="Buscar nas notas..." style="flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none">
+        <button onclick="exportNotas()" style="font-size:11px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:none;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap">📤 Exportar</button>
+      </div>
+      <div id="notes-container" style="margin-top:4px"></div>
+    </div>
+  </div>
+  <!-- Bottom Nav -->
+  <nav id="nav">
+    <button class="nav-btn active" onclick="goPage('home')" id="nav-home">
+      <span class="ic">🏠</span><span class="lb">Início</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('progress')" id="nav-progress">
+      <span class="ic">📊</span><span class="lb">Progresso</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('timer')" id="nav-timer">
+      <span class="ic">⏱</span><span class="lb">Timer</span>
+    </button>
+    <button class="nav-btn" onclick="goPage('notes')" id="nav-notes">
+      <span class="ic">📝</span><span class="lb">Notas</span>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// DADOS DOS EDITAIS
+// ══════════════════════════════════════════════════════════
+const DISCS = [
+  {id:"lp",  nome:"Língua Portuguesa",  conc:"ambos", horas:30, dif:3, cor:"#7F77DD"},
+  {id:"info",nome:"Informática",        conc:"ambos", horas:14, dif:2, cor:"#7F77DD"},
+  {id:"mat", nome:"Matemática",         conc:"ambos", horas:26, dif:4, cor:"#7F77DD"},
+  {id:"rl",  nome:"Raciocínio Lógico",  conc:"ambos", horas:16, dif:4, cor:"#7F77DD"},
+  {id:"at",  nome:"Atualidades",        conc:"ambos", horas:6,  dif:1, cor:"#7F77DD"},
+  {id:"fis", nome:"Física",             conc:"pe",    horas:22, dif:5, cor:"#185FA5"},
+  {id:"bio", nome:"Biologia",           conc:"pe",    horas:18, dif:3, cor:"#185FA5"},
+  {id:"dc",  nome:"Dir. Constitucional",conc:"pe",    horas:12, dif:3, cor:"#185FA5"},
+  {id:"hpe", nome:"História PE",        conc:"pe",    horas:6,  dif:2, cor:"#185FA5"},
+  {id:"ing", nome:"Língua Inglesa",     conc:"al",    horas:10, dif:2, cor:"#3B6D11"},
+  {id:"leg", nome:"Legislação CBM AL",  conc:"al",    horas:12, dif:3, cor:"#3B6D11"},
+  {id:"cdh", nome:"Cidadania e DH",     conc:"al",    horas:10, dif:2, cor:"#3B6D11"},
+];
+const TOPICS = {
+  lp:[
+    {n:"Interpretação de textos",h:5,d:3},{n:"Concordância verbal e nominal",h:3,d:4},
+    {n:"Sintaxe da oração e período",h:3,d:4},{n:"Emprego das classes de palavras",h:3,d:3},
+    {n:"Redação oficial (Manual 2018)",h:3,d:2},{n:"Ortografia oficial",h:2,d:2},
+    {n:"Acentuação gráfica",h:2,d:2},{n:"Crase",h:2,d:3},{n:"Coesão textual",h:2,d:3},
+    {n:"Pontuação",h:2,d:2},{n:"Regência verbal e nominal",h:2,d:3},
+    {n:"Significação das palavras",h:2,d:2},{n:"Tipologias textuais",h:2,d:2},
+    {n:"Colocação pronominal",h:1,d:3},{n:"Variação linguística",h:1,d:1},
+  ],
+  info:[
+    {n:"BrOffice / LibreOffice",h:3,d:2},{n:"Segurança da informação",h:2,d:2},
+    {n:"Ferramentas de internet",h:2,d:2},{n:"Gerenciamento Windows",h:2,d:1},
+    {n:"Microsoft Office 2019",h:2,d:2},{n:"Linux (noções — AL)",h:2,d:2},
+    {n:"Cloud computing / storage",h:1,d:2},{n:"Redes e navegadores",h:1,d:2},
+    {n:"Redes sociais (AL)",h:1,d:1},{n:"Backup e armazenamento",h:1,d:1},
+  ],
+  mat:[
+    {n:"Porcentagem, juros e taxas",h:4,d:3},{n:"Funções 1º e 2º grau",h:3,d:4},
+    {n:"Geometria plana: áreas",h:3,d:3},{n:"Regra de três simples/composta",h:2,d:2},
+    {n:"PA e PG",h:2,d:3},{n:"Equações e inequações",h:2,d:3},
+    {n:"Princípios de contagem",h:2,d:3},{n:"Divisibilidade e fatoração",h:2,d:3},
+    {n:"Semelhança e Teorema de Tales",h:2,d:4},{n:"Trigonometria",h:2,d:4},
+    {n:"Estatística: análise de dados",h:2,d:2},{n:"Conjuntos numéricos",h:2,d:2},
+    {n:"Probabilidade",h:1,d:3},{n:"Medidas de dispersão",h:1,d:3},
+    {n:"Taxas de juros: nominal/efetiva (AL)",h:3,d:4},{n:"Capitalização e descontos (AL)",h:3,d:3},
+  ],
+  rl:[
+    {n:"Proposições e conectivos lógicos",h:3,d:3},{n:"Combinações e permutações (PE)",h:3,d:4},
+    {n:"Equivalência lógica; De Morgan",h:2,d:4},{n:"Analogias, inferências e deduções",h:2,d:4},
+    {n:"Quantificadores e negação",h:2,d:3},{n:"Raciocínio analítico situacional (AL)",h:2,d:4},
+    {n:"Diagramas lógicos",h:2,d:3},{n:"Estatística básica (AL)",h:2,d:3},
+  ],
+  fis:[
+    {n:"Cinemática: MRU, MRUV, queda livre",h:4,d:4},{n:"Dinâmica: Leis de Newton",h:3,d:4},
+    {n:"Lei de Ohm e circuitos elétricos",h:3,d:4},{n:"Calorimetria e termologia",h:2,d:3},
+    {n:"Trabalho e energia mecânica",h:2,d:3},{n:"Hidrostática: Arquimedes, Pascal",h:2,d:3},
+    {n:"Ondas: frequência e comprimento",h:2,d:3},{n:"Óptica: espelhos e lentes",h:2,d:3},
+    {n:"Fenômenos elétricos: Coulomb",h:2,d:4},{n:"Impulso e momento linear",h:2,d:4},
+    {n:"Dilatação térmica",h:2,d:3},{n:"Grandezas e vetores",h:1,d:2},
+    {n:"Torque e equilíbrio estático",h:1,d:3},{n:"Campo magnético",h:1,d:3},
+    {n:"Gravitação e Kepler",h:1,d:3},{n:"Gases ideais e termodinâmica",h:1,d:4},
+  ],
+  bio:[
+    {n:"Fisiologia humana",h:4,d:3},{n:"Doenças e prevenção",h:3,d:2},
+    {n:"Primeiros socorros",h:2,d:2},{n:"Biomas e meio ambiente",h:2,d:2},
+    {n:"Ecossistemas e cadeias alimentares",h:2,d:2},{n:"Estrutura e fisiologia celular",h:2,d:3},
+    {n:"Divisão celular: mitose e meiose",h:2,d:3},{n:"Metabolismo energético",h:2,d:3},
+    {n:"Genética e síntese proteica",h:2,d:4},{n:"Ciclos biogeoquímicos",h:1,d:2},
+    {n:"Tecidos animais e vegetais",h:1,d:2},{n:"Evolução",h:1,d:2},
+    {n:"ISTs e saúde sexual",h:1,d:2},{n:"Biotecnologia",h:1,d:2},
+    {n:"Legislação ambiental",h:1,d:2},
+  ],
+  dc:[
+    {n:"Art. 5º CF — direitos fundamentais",h:4,d:3},{n:"Remédios constitucionais",h:2,d:3},
+    {n:"Princípios fundamentais (Arts. 1–4)",h:2,d:2},{n:"Art. 144 CF — segurança pública",h:1,d:2},
+    {n:"Organização dos Poderes",h:1,d:2},{n:"Adm. Pública e servidores",h:1,d:2},
+    {n:"Organização político-administrativa",h:1,d:2},{n:"Direitos sociais (Arts. 6–11)",h:1,d:2},
+  ],
+  hpe:[
+    {n:"Rev. Pernambucana (1817) e Conf. do Equador (1824)",h:2,d:2},
+    {n:"Presença holandesa e Nassau",h:1,d:2},{n:"Ocupação colonial e Duarte Coelho",h:1,d:2},
+    {n:"Açúcar e economia local",h:1,d:2},{n:"Frevo (UNESCO) e cultura popular",h:1,d:1},
+    {n:"Guerras: Mascates, Cabanos, Praieira",h:1,d:2},
+    {n:"Formação de Olinda e Recife",h:1,d:1},{n:"Pernambuco e a República",h:1,d:1},
+  ],
+  ing:[
+    {n:"Compreensão de textos em inglês",h:5,d:2},
+    {n:"Itens gramaticais para compreensão semântica",h:5,d:2},
+  ],
+  leg:[
+    {n:"Lei 5.346/1992 — Estatuto PM AL",h:3,d:3},
+    {n:"Decreto 37.042/1996 — Reg. Disciplinar PM AL",h:2,d:3},
+    {n:"Lei 6.514/2004 — Acesso Oficiais e Praças",h:2,d:3},
+    {n:"Lei 6.544/2004 — Acesso Soldados e Cabos",h:2,d:3},
+    {n:"Lei Federal 14.751/2023 — Regime Jurídico",h:3,d:3},
+  ],
+  cdh:[
+    {n:"Ética e função pública",h:2,d:2},{n:"DH: responsabilidade do Estado",h:2,d:3},
+    {n:"Ética e moral; princípios e valores",h:2,d:2},
+    {n:"Teoria geral dos direitos humanos",h:2,d:2},
+    {n:"Cidadania e democracia",h:1,d:2},{n:"Afirmação histórica dos DH",h:1,d:2},
+  ],
+  at:[
+    {n:"Saúde, violência e reformas sociais BR",h:2,d:1},
+    {n:"Clima, energia e meio ambiente",h:2,d:1},
+    {n:"Conflitos internacionais",h:1,d:1},{n:"MERCOSUL e América Latina",h:1,d:1},
+  ],
+};
+
+// ══════════════════════════════════════════════════════════
+// STATE & STORAGE
+// ══════════════════════════════════════════════════════════
+let state = { progress:{}, notes:{}, sessions:[], streak:0, lastStudy:null, notifEnabled:false };
+function loadState(){
+  try { const s=localStorage.getItem('cbm_state'); if(s) state=JSON.parse(s); } catch(e){}
+}
+function saveState(){
+  try { localStorage.setItem('cbm_state',JSON.stringify(state)); } catch(e){}
+}
+function getP(did,ti){ const k=did+':'+ti; if(!state.progress[k]) state.progress[k]={s:0,n:''}; return state.progress[k]; }
+function totalH(did){ return (TOPICS[did]||[]).reduce((a,t)=>a+t.h,0); }
+function doneH(did){ return (TOPICS[did]||[]).reduce((a,t,i)=>a+(getP(did,i).s||0),0); }
+function totalAll(){ return DISCS.reduce((a,d)=>a+totalH(d.id),0); }
+function doneAll(){ return DISCS.reduce((a,d)=>a+doneH(d.id),0); }
+function pct(done,tot){ return tot>0?Math.min(100,Math.round(done/tot*100)):0; }
+
+// ══════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════
+let currentPage = 'home';
+function goPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.getElementById('nav-'+p)?.classList.add('active');
+  currentPage=p;
+  const titles={home:'🔥 CBM Estudos',progress:'📊 Progresso',timer:'⏱ Timer de Estudo',notes:'📝 Minhas Notas'};
+  document.getElementById('page-title').textContent=titles[p]||'CBM Estudos';
+  if(p==='home') renderHome();
+  if(p==='progress') renderProgress();
+  if(p==='notes') renderNotes();
+}
+
+// ══════════════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════════════
+function encour(p){
+  if(p===0) return '🚀 Comece hoje — cada hora conta!';
+  if(p<20)  return '💪 Bom começo! Continue assim!';
+  if(p<40)  return '🔥 Você está no caminho certo!';
+  if(p<60)  return '⭐ Mais da metade! Incrível!';
+  if(p<80)  return '🏅 Reta final! Não pare agora!';
+  if(p<100) return '🏆 Quase lá! Você vai conseguir!';
+  return '🎉 Parabéns! Agora é só revisar!';
+}
+function difCor(d){ return d<=2?'#3B6D11':d===3?'#BA7517':'#993C1D'; }
+function renderHome(){
+  const tot=totalAll(), done=doneAll(), p=pct(done,tot);
+  document.getElementById('home-pct').textContent=p+'%';
+  document.getElementById('home-bar').style.width=p+'%';
+  document.getElementById('home-encour').textContent=encour(p);
+  document.getElementById('hdr-pct').textContent=p+'%';
+  document.getElementById('hm-done').textContent=done+'h';
+  document.getElementById('hm-rest').textContent=(tot-done)+'h';
+  document.getElementById('hm-total').textContent=tot+'h';
+  document.getElementById('streak-num').textContent=state.streak||0;
+  // Disc mini bars
+  const c=document.getElementById('home-discs'); c.innerHTML='';
+  DISCS.forEach(d=>{
+    const dh=doneH(d.id), th=totalH(d.id), pp=pct(dh,th);
+    c.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border2)">
+      <div style="font-size:11px;color:var(--text2);width:90px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.nome}</div>
+      <div style="flex:1"><div class="prog-bar"><div class="prog-fill" style="width:${pp}%;background:${pp===100?'var(--green)':d.cor}"></div></div></div>
+      <div style="font-size:10px;color:${pp===100?'var(--green)':'var(--text3)'};width:28px;text-align:right">${pp}%</div>
+    </div>`;
+  });
+  // Today sessions
+  const today=new Date().toDateString();
+  const todaySess=(state.sessions||[]).filter(s=>s.date===today);
+  const todayEl=document.getElementById('home-today');
+  if(todaySess.length===0){ todayEl.textContent='Nenhuma sessão registrada hoje.'; }
+  else{
+    todayEl.innerHTML=todaySess.map(s=>`<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:12px;border-bottom:1px solid var(--border2)"><span style="color:var(--text)">${s.disc}</span><span style="color:var(--green)">${s.mins}min</span></div>`).join('');
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// PROGRESS PAGE
+// ══════════════════════════════════════════════════════════
+let selDisc = 'lp';
+function renderProgress(){
+  // Pills
+  const pills=document.getElementById('disc-pills'); pills.innerHTML='';
+  DISCS.forEach(d=>{
+    const dh=doneH(d.id), th=totalH(d.id), pp=pct(dh,th);
+    const pill=document.createElement('button');
+    pill.className='disc-pill'+(d.id===selDisc?' sel':'');
+    if(d.id===selDisc) pill.style.background=d.cor;
+    pill.textContent=d.nome+(pp===100?' ✓':'');
+    pill.onclick=()=>{selDisc=d.id; renderProgress();};
+    pills.appendChild(pill);
+  });
+  // Topics
+  const disc=DISCS.find(d=>d.id===selDisc);
+  const tps=TOPICS[selDisc]||[];
+  const c=document.getElementById('topics-container'); c.innerHTML='';
+  // Disc header
+  const dh2=doneH(selDisc), th2=totalH(selDisc), pp2=pct(dh2,th2);
+  const doneAll2=pp2===100;
+  const hdr=document.createElement('div');
+  hdr.className='card'; hdr.style.marginBottom='4px';
+  hdr.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div style="font-size:14px;font-weight:700;color:${disc.cor}">${disc.nome}</div>
+    <div style="font-size:12px;font-weight:600;color:${doneAll2?'var(--green)':'var(--text2)'}">${dh2}/${th2}h</div>
+  </div>
+  <div class="prog-bar" style="height:8px"><div class="prog-fill" style="width:${pp2}%;background:${doneAll2?'var(--green)':disc.cor}"></div></div>
+  ${doneAll2?`<div style="margin-top:8px;font-size:12px;color:var(--green)">🌟 Disciplina concluída! Revise quando puder.</div>`:''}`;
+  c.appendChild(hdr);
+  tps.forEach((tp,ti)=>{
+    const p=getP(selDisc,ti);
+    const studied=Math.min(p.s||0,tp.h);
+    const done=studied>=tp.h;
+    const donePct=pct(studied,tp.h);
+    const card=document.createElement('div');
+    card.className='topic-card'+(done?' done':'');
+    const noteOpen=p.no||false;
+    card.innerHTML=`
+      <div class="topic-name">${tp.n}</div>
+      <div class="topic-meta">
+        <div class="dif-dots">${[1,2,3,4,5].map(i=>`<div class="dif-dot" style="background:${i<=tp.d?difCor(tp.d):'var(--bg3)'}"></div>`).join('')}</div>
+        <span style="font-size:10px;color:var(--text2)">Dific. ${tp.d}/5</span>
+        <span style="font-size:10px;color:var(--text2)">·</span>
+        <span style="font-size:10px;color:var(--text2)">${tp.h}h necessárias</span>
+      </div>
+      <div class="hours-row">
+        <div class="hours-label">Horas estudadas:</div>
+        <div class="hours-ctrl">
+          <button class="h-btn" onclick="adjH('${selDisc}',${ti},${tp.h},-0.5)">−</button>
+          <input class="h-inp" type="number" min="0" max="${tp.h}" step="0.5" value="${studied}" onchange="setH('${selDisc}',${ti},${tp.h},this.value)">
+          <button class="h-btn" onclick="adjH('${selDisc}',${ti},${tp.h},+0.5)">+</button>
+        </div>
+      </div>
+      <div class="dual-bar">
+        <div class="bar-done" style="width:${donePct}%"></div>
+        <div class="bar-rest" style="width:${100-donePct}%"></div>
+      </div>
+      <div class="bar-labels">
+        <span class="done">✓ ${studied}h estudadas</span>
+        <span class="rest">${done?'Concluído!':tp.h-studied+'h restantes'}</span>
+      </div>
+      ${done?`<div class="done-banner">🎉 Concluído! Continue assim — você está indo muito bem!</div>`:''}
+      <button class="note-btn" onclick="toggleNote('${selDisc}',${ti})">${p.n?'📝 Nota salva':'➕ Adicionar nota/comentário'}</button>
+      <div id="note-area-${selDisc}-${ti}" style="display:${noteOpen?'block':'none'}">
+        <textarea class="note-area" placeholder="Resumo, dúvidas, macetes sobre este tópico..." onchange="saveNote('${selDisc}',${ti},this.value)">${p.n||''}</textarea>
+      </div>
+    `;
+    c.appendChild(card);
+  });
+}
+
+function adjH(did,ti,max,delta){
+  const p=getP(did,ti);
+  p.s=Math.min(max,Math.max(0,(p.s||0)+delta));
+  saveState(); updateStreak(); renderProgress(); renderHome();
+}
+function setH(did,ti,max,val){
+  const p=getP(did,ti);
+  p.s=Math.min(max,Math.max(0,parseFloat(val)||0));
+  saveState(); updateStreak(); renderProgress(); renderHome();
+}
+function toggleNote(did,ti){
+  const p=getP(did,ti); p.no=!p.no; saveState();
+  const el=document.getElementById(`note-area-${did}-${ti}`);
+  if(el) el.style.display=p.no?'block':'none';
+}
+function saveNote(did,ti,val){ getP(did,ti).n=val; saveState(); }
+
+// ══════════════════════════════════════════════════════════
+// TIMER
+// ══════════════════════════════════════════════════════════
+let timerState={ running:false, secs:25*60, total:25*60, breakSecs:5*60, phase:'focus', pomCount:0, interval:null, disc:'', mode:'pomodoro' };
+function setMode(mins,brk,mode){
+  clearInterval(timerState.interval); timerState.running=false;
+  timerState.secs=mins*60; timerState.total=mins*60; timerState.breakSecs=brk*60; timerState.phase='focus'; timerState.mode=mode;
+  document.getElementById('timer-play-btn').textContent='▶ Iniciar';
+  updateTimerUI();
+}
+function toggleTimer(){
+  if(timerState.running){
+    clearInterval(timerState.interval); timerState.running=false;
+    document.getElementById('timer-play-btn').textContent='▶ Continuar';
+  } else {
+    timerState.running=true;
+    document.getElementById('timer-play-btn').textContent='⏸ Pausar';
+    timerState.interval=setInterval(()=>{
+      timerState.secs--;
+      if(timerState.secs<=0){
+        if(timerState.phase==='focus'){
+          logSession();
+          timerState.phase='break'; timerState.secs=timerState.breakSecs;
+          timerState.pomCount=(timerState.pomCount+1)%8;
+          if(timerState.notifEnabled) showNotif('Pausa!','Sessão concluída. Descanse um pouco.');
+        } else {
+          timerState.phase='focus'; timerState.secs=timerState.total;
+          if(timerState.notifEnabled) showNotif('Hora de focar!','Pausa acabou. Bora estudar!');
+        }
+      }
+      updateTimerUI();
+    },1000);
+  }
+}
+function resetTimer(){
+  clearInterval(timerState.interval); timerState.running=false;
+  timerState.secs=timerState.total; timerState.phase='focus';
+  document.getElementById('timer-play-btn').textContent='▶ Iniciar';
+  updateTimerUI();
+}
+function updateTimerUI(){
+  const m=String(Math.floor(timerState.secs/60)).padStart(2,'0');
+  const s=String(timerState.secs%60).padStart(2,'0');
+  const txt=`${m}:${s}`;
+  document.getElementById('timer-disp').textContent=txt;
+  document.getElementById('home-timer-disp').textContent=txt;
+  document.title=timerState.running?`${txt} — CBM Estudos`:'CBM Estudos';
+  const total=timerState.phase==='focus'?timerState.total:timerState.breakSecs;
+  const ratio=(total-timerState.secs)/total;
+  const circ=565.48;
+  document.getElementById('timer-arc').style.strokeDashoffset=circ*(1-ratio);
+  document.getElementById('timer-arc').style.stroke=timerState.phase==='focus'?'var(--accent)':'var(--green)';
+  document.getElementById('timer-phase').textContent=timerState.phase==='focus'?'🎯 Foco':'☕ Pausa';
+  const dots=document.getElementById('pom-dots'); dots.innerHTML='';
+  for(let i=0;i<8;i++){
+    const d=document.createElement('div');
+    d.className='pom-dot'+(i<timerState.pomCount?' done':'');
+    dots.appendChild(d);
+  }
+}
+function logSession(){
+  const disc=document.getElementById('timer-disc-sel').value||'Geral';
+  const mins=Math.round(timerState.total/60);
+  const sess={disc,mins,date:new Date().toDateString(),time:new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};
+  state.sessions=[sess,...(state.sessions||[])].slice(0,50);
+  saveState(); updateStreak();
+  const log=document.getElementById('session-log');
+  log.innerHTML=`<div class="log-item">${sess.time} · ${disc} · ${mins}min ✓</div>`+(log.innerHTML==='<div style="font-size:12px;color:var(--text2)">Nenhuma sessão ainda.</div>'?'':log.innerHTML);
+}
+function initTimerSelect(){
+  const sel=document.getElementById('timer-disc-sel');
+  DISCS.forEach(d=>{ const o=document.createElement('option'); o.value=d.nome; o.textContent=d.nome; sel.appendChild(o); });
+}
+
+// ══════════════════════════════════════════════════════════
+// NOTES PAGE
+// ══════════════════════════════════════════════════════════
+function renderNotes(){
+  const q=document.getElementById('note-search').value.toLowerCase();
+  const c=document.getElementById('notes-container'); c.innerHTML='';
+  let anyNote=false;
+  DISCS.forEach(d=>{
+    const tps=TOPICS[d.id]||[]; let html='', hasNote=false;
+    tps.forEach((tp,ti)=>{
+      const p=getP(d.id,ti);
+      if(p.n && (!q||p.n.toLowerCase().includes(q)||tp.n.toLowerCase().includes(q))){
+        hasNote=true; anyNote=true;
+        html+=`<div class="note-item"><div class="note-topic" style="color:${d.cor}">${tp.n}</div><div class="note-text">${p.n}</div></div>`;
+      }
+    });
+    if(hasNote){
+      const sec=document.createElement('div'); sec.className='notes-disc';
+      sec.innerHTML=`<div class="notes-disc-title">${d.nome}</div>${html}`;
+      c.appendChild(sec);
+    }
+  });
+  if(!anyNote){ c.innerHTML=`<div style="padding:32px 16px;text-align:center;color:var(--text2);font-size:13px">${q?'Nenhuma nota encontrada.':'Você ainda não adicionou nenhuma nota.<br><br>Vá até 📊 Progresso, selecione um tópico e toque em <strong style="color:var(--accent)">Adicionar nota</strong>.'}</div>`; }
+}
+function exportNotas(){
+  let txt='NOTAS DE ESTUDO — CBM PE / CBM AL\n'+'='.repeat(36)+'\n';
+  DISCS.forEach(d=>{
+    const tps=TOPICS[d.id]||[]; let has=false;
+    tps.forEach((tp,ti)=>{
+      const p=getP(d.id,ti);
+      if(p.n){ if(!has){txt+='\n## '+d.nome+'\n';has=true;} txt+=`\n[${tp.n}]\n${p.n}\n`; }
+    });
+  });
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+  a.download='notas-cbm.txt'; a.click();
+}
+document.getElementById('note-search').addEventListener('input',()=>{ if(currentPage==='notes') renderNotes(); });
+
+// ══════════════════════════════════════════════════════════
+// STREAK
+// ══════════════════════════════════════════════════════════
+function updateStreak(){
+  const today=new Date().toDateString();
+  if(state.lastStudy===today) return;
+  const yesterday=new Date(Date.now()-86400000).toDateString();
+  state.streak=(state.lastStudy===yesterday?(state.streak||0)+1:1);
+  state.lastStudy=today;
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════════════════════
+async function toggleNotif(){
+  if(!('Notification' in window)){ alert('Notificações não suportadas neste dispositivo.'); return; }
+  if(Notification.permission==='granted'){
+    state.notifEnabled=!state.notifEnabled; saveState();
+    document.getElementById('notif-btn').textContent=state.notifEnabled?'🔔':'🔕';
+    if(state.notifEnabled) scheduleReminder();
+  } else {
+    const p=await Notification.requestPermission();
+    if(p==='granted'){ state.notifEnabled=true; saveState(); document.getElementById('notif-btn').textContent='🔔'; scheduleReminder(); }
+  }
+}
+function showNotif(title,body){ if(state.notifEnabled && Notification.permission==='granted') new Notification(title,{body,icon:'icon-192.png'}); }
+function scheduleReminder(){
+  const now=new Date(), h=now.getHours();
+  if(h<9||h>21) return;
+  const done=doneAll(), tot=totalAll(), p=pct(done,tot);
+  showNotif('CBM Estudos 📚',`Você está em ${p}% do progresso! Hora de estudar!`);
+}
+
+// ══════════════════════════════════════════════════════════
+// INSTALL PWA
+// ══════════════════════════════════════════════════════════
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('install-bar').classList.remove('hidden');
+});
+function installApp(){
+  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ document.getElementById('install-bar').classList.add('hidden'); deferredPrompt=null; }); }
+}
+window.addEventListener('appinstalled',()=>{ document.getElementById('install-bar').classList.add('hidden'); });
+
+// ══════════════════════════════════════════════════════════
+// HANDLE URL HASH (from shortcuts)
+// ══════════════════════════════════════════════════════════
+function handleHash(){
+  const h=location.hash.replace('#','');
+  if(h==='progresso') goPage('progress');
+  else if(h==='timer') goPage('timer');
+  else if(h==='notas') goPage('notes');
+}
+
+// ══════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════
+loadState();
+initTimerSelect();
+updateTimerUI();
+renderHome();
+handleHash();
+document.getElementById('notif-btn').textContent=state.notifEnabled?'🔔':'🔕';
+
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// Render existing sessions in log
+const todayLog=(state.sessions||[]).filter(s=>s.date===new Date().toDateString()).slice(0,5);
+if(todayLog.length>0){
+  document.getElementById('session-log').innerHTML=todayLog.map(s=>`<div class="log-item">${s.time} · ${s.disc} · ${s.mins}min ✓</div>`).join('');
+}
+</script>
+</body>
+</html>
